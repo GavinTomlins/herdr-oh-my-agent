@@ -13,6 +13,8 @@
 
 This plugin makes the whole team visible. The moment a delegation starts, the subagent's session appears in its own Herdr pane or tab, streaming live. When it finishes, the pane stays (configurable) with the complete transcript.
 
+> **What it is, precisely:** an OpenCode plugin, purpose-built for oh-my-openagent's delegation pattern, packaged and distributed as a Herdr plugin. The runtime logic loads inside OpenCode (that's where delegation events live); Herdr provides the panes, tabs, and agent sidebar it drives — and the `herdr plugin install` distribution channel.
+
 ## Why you'd want it
 
 - **Live visibility** — every delegation pops its own pane the second it starts; the Herdr Agents sidebar tracks each one (working → done) without you polling.
