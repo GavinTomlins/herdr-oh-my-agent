@@ -65,7 +65,20 @@ export const HerdrSubagentPanes: Plugin = async ({ $, client, serverUrl, directo
   const lifecycle = env("HERDR_SUBAGENT_LIFECYCLE") === "close_on_done" ? "close_on_done" : "keep";
   const maxPanes = Number(env("HERDR_SUBAGENT_MAX_PANES") ?? "8") || 8;
 
-  const attachUrl = serverUrl.toString().replace(/\/+$/, "");
+  // OpenCode defaults to --port 0, so every concurrent session binds its own
+  // free port and reports the resolved one here. Fall back to OPENCODE_PORT
+  // only if the URL somehow arrives without a usable port.
+  const attachUrl = (() => {
+    const reported = serverUrl?.toString().replace(/\/+$/, "") ?? "";
+    try {
+      const port = new URL(reported).port;
+      if (port && port !== "0") return reported;
+    } catch {
+      // fall through to the environment
+    }
+    const envPort = env("OPENCODE_PORT");
+    return envPort ? `http://127.0.0.1:${envPort}` : reported;
+  })();
 
   log(
     `active: pane=${hostPaneId} workspace=${workspaceId ?? "?"} placement=${placement} ` +

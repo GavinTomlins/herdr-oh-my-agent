@@ -65,15 +65,19 @@ README.md): `HERDR_SUBAGENT_PANES`, `HERDR_SUBAGENT_PLACEMENT` (split|tab),
 `HERDR_SUBAGENT_RATIO`, `HERDR_SUBAGENT_LIFECYCLE` (keep|close_on_done),
 `HERDR_SUBAGENT_MAX_PANES`.
 
-OpenCode must be launched with a fixed port (`opencode --port 4096`) so the
-attach URL the plugin builds from `serverUrl` is reachable.
+No port configuration is required. OpenCode defaults to `--port 0`, so each
+session binds its own free port and reports it via `serverUrl`, which the
+plugin uses to build the attach URL. Multiple concurrent OpenCode sessions
+therefore work without coordination. Do not advise users to pin `--port`:
+that is what causes "opencode hangs at launch" when an older instance still
+holds the port.
 
 ## Verification procedure
 
 1. Confirm registration: the absolute path of `packages/herdr-subagent-panes`
    appears in the `plugin` array of the opencode config.
 2. Have the user (or a Herdr-hosted agent) restart opencode inside a Herdr
-   pane: `HERDR_SUBAGENT_PLACEMENT=tab opencode --port 4096`.
+   pane: `HERDR_SUBAGENT_PLACEMENT=tab opencode`.
 3. Check the decision log:
    `cat ~/.local/share/herdr-subagent-panes/plugin.log`
    - `active: pane=<id> …` → loaded and armed. Proceed.

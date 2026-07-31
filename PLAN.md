@@ -111,10 +111,13 @@ Plugin A works standalone; B only improves presentation.
 
 ## Known constraints (verified in source)
 
-- **Fixed port required**: `opencode` must run with `--port N` (and `OPENCODE_PORT=N`)
-  so the attach URL is resolvable — omo's `resolve-server-url.ts:20-25` documents the
-  port-0 caveat. The Part 1 setup script needs a small amendment to launch each
-  primary agent with a distinct fixed port.
+- **No fixed port needed** (revised after testing): omo's `resolve-server-url.ts:20-25`
+  documents a port-0 caveat, but that applies to omo's *own* tmux feature, which lacks
+  a reliable `serverUrl`. This plugin reads `serverUrl` straight from `PluginInput`, and
+  `opencode` defaults to `--port 0` — verified empirically that two concurrent portless
+  servers bind distinct free ports and each reports its own URL. So concurrent sessions
+  need no coordination; pinning `--port` actively causes "hangs at launch" collisions.
+  `OPENCODE_PORT` remains a fallback in the plugin if a URL ever arrives without a port.
 - **One effective agent per pane** in Herdr's model — fine here, since each subagent
   gets its own pane; the tree is expressed via metadata tokens, not nesting.
 - **Alternate-screen TUIs don't enter herdr host scrollback** — `herdr pane read` on an
@@ -132,7 +135,7 @@ Plugin A works standalone; B only improves presentation.
 ## Phases
 
 **Phase 0 — spike (manual, ~30 min, needs a human inside Herdr):**
-1. Launch opencode with a fixed port inside a herdr pane; run a real delegation prompt.
+1. Launch opencode inside a herdr pane; run a real delegation prompt.
 2. From another pane: confirm child session id appears (`/session` API or storage dir),
    then `herdr pane split` + `pane run "opencode attach ..."` by hand.
 3. Confirm: attach shows the live subagent transcript; herdr sidebar shows the pane;
@@ -144,7 +147,7 @@ report-metadata, `keep` lifecycle. Register in the `subagent-harness` opm profil
 
 **Phase 2 — config + tabs + lifecycle:** full config schema, `placement: tab`,
 `close_on_done`/ttl, `report-agent-session` restore refs, max_panes guard,
-include/exclude filters. Amend Part 1 setup script for fixed ports.
+include/exclude filters.
 
 **Phase 3 — sidebar tree (Plugin B) + `stream` mode:** agent.view.set projection and
 row templates; optional read-only plaintext streamer (subscribe to the server's

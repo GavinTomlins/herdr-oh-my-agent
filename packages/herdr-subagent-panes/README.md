@@ -21,8 +21,9 @@ install/verify procedures.
 - Running inside a Herdr-managed pane (`HERDR_PANE_ID` set — otherwise the
   plugin silently no-ops).
 - `herdr` on PATH inside the pane.
-- OpenCode launched with a **fixed port** so the attach URL resolves, e.g.
-  `opencode --port 4096`.
+- No port setup: OpenCode defaults to `--port 0`, so each session binds a free
+  port and reports it via `serverUrl`; concurrent sessions need no
+  coordination. `OPENCODE_PORT` is used only as a fallback.
 - omo's own tmux mirroring stays **disabled** (`tmux.enabled: false`, the
   default) — this plugin is its Herdr analogue.
 
@@ -73,7 +74,7 @@ never affect delegation. Every decision is appended to
 ## Verify (inside a Herdr pane)
 
 ```bash
-HERDR_SUBAGENT_PLACEMENT=tab opencode --port 4096
+HERDR_SUBAGENT_PLACEMENT=tab opencode
 ```
 
 Then give the orchestrator a real task that delegates (e.g. "Delegate to the

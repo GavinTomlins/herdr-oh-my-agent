@@ -58,6 +58,8 @@ Every omo delegation creates a **real child OpenCode session** on the OpenCode s
 | [oh-my-openagent](https://omo.dev/docs) ≥ 4.19 | The orchestration layer whose delegations are mirrored |
 | [Bun](https://bun.sh) | Runs the OpenCode plugin |
 
+No port configuration needed: OpenCode defaults to `--port 0`, so every session you start binds its own free port, and the plugin attaches using the port that session actually reports. Run as many concurrent orchestrators as you like.
+
 ## Quick start
 
 1. **Install** via the Herdr plugin system (review the preview, confirm):
@@ -72,13 +74,13 @@ Every omo delegation creates a **real child OpenCode session** on the OpenCode s
    herdr plugin action invoke gavintomlins.herdr-oh-my-agent.register
    ```
 
-3. **Launch** OpenCode inside a Herdr pane, with a fixed port:
+3. **Launch** OpenCode inside a Herdr pane:
 
    ```bash
-   opencode --port 4096
+   opencode
    ```
 
-   Prefer tabs over splits? `HERDR_SUBAGENT_PLACEMENT=tab opencode --port 4096`
+   Prefer tabs over splits? `HERDR_SUBAGENT_PLACEMENT=tab opencode`
 
 4. **Delegate.** Any prompt that makes the orchestrator delegate pops a live pane per subagent. Try:
 
@@ -118,7 +120,6 @@ Both placements are shown in the demos at the top of this page.
 
 ## Limitations
 
-- **A fixed port is required.** `opencode --port 4096` (any port) — attach URLs can't be built from a random port.
 - **Panes are per-session, not per-agent.** Three oracle delegations = three panes, each with its own complete transcript. Busy orchestrations may prefer `close_on_done` or a higher cap.
 - **Scrollback lives inside the attach pane.** Scroll there for the full replayed transcript; Herdr's own `pane read` sees only the visible viewport of full-screen apps.
 - **Trivial prompts don't delegate.** "What is today?" is answered inline by the orchestrator — no subagent, no pane. Correct behavior, not a failure.
@@ -138,7 +139,7 @@ tail -f ~/.local/share/herdr-subagent-panes/plugin.log
 | No log file after starting opencode | Plugin not loaded — check the `plugin` array in `opencode.json`, restart opencode (plugins load at startup only) |
 | `loaded but disabled: HERDR_PANE_ID not set` | opencode isn't running inside a Herdr-managed pane |
 | `active: …` but no pane on delegation | Check the log for `herdr exit …` lines — they include herdr's stderr. Verify `herdr` is on PATH in that pane |
-| opencode hangs at launch with no output | The port is already taken by an earlier instance — `lsof -nP -iTCP:4096 -sTCP:LISTEN`, then quit or `kill` it |
+| opencode hangs at launch with no output | Only happens if you pass `--port N` explicitly and an earlier instance still holds it — `lsof -nP -iTCP:N -sTCP:LISTEN`, then quit that one or just drop the flag |
 | `session.created … parentID=none` only | Your prompt didn't cause a delegation — see the example prompts above |
 | Pane appears then instantly closes | The attach raced session creation; the plugin waits for readiness, but if it recurs please open an issue |
 
