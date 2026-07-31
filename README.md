@@ -2,6 +2,7 @@
 
 **See every oh-my-openagent subagent working live, each in its own [Herdr](https://herdr.dev) pane or tab — with full session state and scrollback.**
 
+[![Release](https://img.shields.io/github/v/release/GavinTomlins/herdr-oh-my-agent)](https://github.com/GavinTomlins/herdr-oh-my-agent/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Herdr](https://img.shields.io/badge/herdr-%E2%89%A50.7.5-4c9a6a)](https://herdr.dev/docs/install/)
 [![OpenCode](https://img.shields.io/badge/opencode-%E2%89%A51.18-3178c6)](https://opencode.ai)
