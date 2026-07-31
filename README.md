@@ -105,6 +105,10 @@ Set env vars where you launch `opencode`:
 | `HERDR_SUBAGENT_LIFECYCLE` | `keep` | `keep` leaves panes open for review; `close_on_done` closes them when the subagent finishes |
 | `HERDR_SUBAGENT_MAX_PANES` | `8` | Cap on mirror panes, guarding against delegation storms |
 
+`HERDR_SUBAGENT_PLACEMENT=tab` gives every subagent its own labeled tab instead of a split — the tab bar becomes your delegation timeline:
+
+![Demo: tab placement — each subagent in its own labeled tab](assets/demo-tabs.gif)
+
 ## Limitations
 
 - **A fixed port is required.** `opencode --port 4096` (any port) — attach URLs can't be built from a random port.
