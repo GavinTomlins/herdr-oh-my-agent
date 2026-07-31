@@ -2,9 +2,31 @@
 
 **See every oh-my-openagent subagent working live, each in its own [Herdr](https://herdr.dev) pane or tab — with full session state and scrollback.**
 
-[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (a.k.a. *oh-my-agent* / *omo*) turns [OpenCode](https://opencode.ai) into an orchestrated team: a coordinator agent (sisyphus, atlas, …) delegates work to specialist subagents (oracle, momus, explore, librarian, sisyphus-junior, …). Normally those delegations are invisible — you watch a single pane that just says "working", or you walk the session tree by hand (`Ctrl+X` + arrow keys) after the fact.
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Herdr](https://img.shields.io/badge/herdr-%E2%89%A50.7.5-4c9a6a)](https://herdr.dev/docs/install/)
+[![OpenCode](https://img.shields.io/badge/opencode-%E2%89%A51.18-3178c6)](https://opencode.ai)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux-lightgrey)](#requirements)
 
-This plugin makes the whole team visible. The moment a delegation starts, the subagent's session appears in its own Herdr pane or tab, streaming live. When it finishes, the pane stays (configurable) with the complete transcript — scroll back through everything the subagent did, whenever you like.
+![Demo: subagent panes appearing live in Herdr as the orchestrator delegates](assets/demo.gif)
+
+[oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (a.k.a. *oh-my-agent* / *omo*) turns [OpenCode](https://opencode.ai) into an orchestrated team: a coordinator agent (sisyphus, atlas, …) delegates work to specialist subagents (oracle, momus, explore, librarian, sisyphus-junior, …). Normally those delegations are invisible — you watch a single pane that just says "working", or you walk the session tree by hand (`Ctrl+X` + arrows) after the fact.
+
+This plugin makes the whole team visible. The moment a delegation starts, the subagent's session appears in its own Herdr pane or tab, streaming live. When it finishes, the pane stays (configurable) with the complete transcript.
+
+## Why you'd want it
+
+- **Live visibility** — every delegation pops its own pane the second it starts; the Herdr Agents sidebar tracks each one (working → done) without you polling.
+- **Full scrollback, forever** — each pane attaches to the *real* child OpenCode session. Sessions persist on disk; scroll the entire transcript during or long after the run, or re-attach days later.
+- **Zero interference** — pure observation. Delegation semantics, model routing, and safety behavior are untouched; nothing executes twice; a failed Herdr call can never break a delegation.
+- **Panes or tabs, your call** — split beside the orchestrator or one tab per subagent, chosen by one env var.
+
+## How it works
+
+Every omo delegation creates a **real child OpenCode session** on the OpenCode server. This plugin (an OpenCode plugin) listens for those sessions being created and, for each one:
+
+1. Creates a Herdr split or tab next to your orchestrator (never stealing focus).
+2. Runs `opencode attach --session <child-session-id>` in it — the pane shows the *actual* subagent session, live.
+3. Reports the agent's name, task, and session id to Herdr, so the Agents sidebar tracks it and Herdr's session restore can revive the pane later.
 
 ```
 ┌─ orchestrator ─────────┐┌─ oracle ────────────────┐
@@ -18,16 +40,6 @@ This plugin makes the whole team visible. The moment a delegation starts, the su
 └────────────────────────┘└─────────────────────────┘
 ```
 
-## How it works
-
-Every omo delegation creates a **real child OpenCode session** on the OpenCode server. This plugin (an OpenCode plugin) listens for those sessions being created and, for each one:
-
-1. Creates a Herdr split or tab next to your orchestrator (never stealing focus).
-2. Runs `opencode attach --session <child-session-id>` in it — the pane shows the *actual* subagent session, live.
-3. Reports the agent's name, task, and session id to Herdr, so the Agents sidebar tracks it and Herdr's session restore can revive the pane later.
-
-Nothing about delegation itself changes and nothing executes twice — this is pure observation of sessions that already exist. Sessions persist on disk, so panes can be closed and re-attached at any time, even days later.
-
 ## Requirements
 
 | Requirement | Why |
@@ -36,27 +48,39 @@ Nothing about delegation itself changes and nothing executes twice — this is p
 | [OpenCode](https://opencode.ai) ≥ 1.18 | Provides `opencode attach --session` |
 | [oh-my-openagent](https://omo.dev/docs) ≥ 4.19 | The orchestration layer whose delegations are mirrored |
 | [Bun](https://bun.sh) | Runs the OpenCode plugin |
-| OpenCode launched with a **fixed port** | So attach URLs are resolvable (see Usage) |
 
-Keep omo's own tmux mirroring disabled (`tmux.enabled: false` — the default). This plugin is its Herdr equivalent; running both would fight over the same sessions.
+## Quick start
 
-## Install
+1. **Install** via the Herdr plugin system (review the preview, confirm):
 
-### Via the Herdr plugin system (recommended)
+   ```bash
+   herdr plugin install GavinTomlins/herdr-oh-my-agent
+   ```
 
-```bash
-herdr plugin install GavinTomlins/herdr-oh-my-agent
-```
+2. **Register** the OpenCode plugin into your `opencode.json` (idempotent; a timestamped backup is taken first — `…unregister` reverses it):
 
-The install preview shows the manifest and build command (`bun install` for the bundled OpenCode plugin). Then register the OpenCode plugin into your `opencode.json`:
+   ```bash
+   herdr plugin action invoke gavintomlins.herdr-oh-my-agent.register
+   ```
 
-```bash
-herdr plugin action invoke gavintomlins.herdr-oh-my-agent.register
-```
+3. **Launch** OpenCode inside a Herdr pane, with a fixed port:
 
-The register action is idempotent and takes a timestamped backup of `opencode.json` before touching it. `…unregister` reverses it.
+   ```bash
+   opencode --port 4096
+   ```
 
-### Manual
+   Prefer tabs over splits? `HERDR_SUBAGENT_PLACEMENT=tab opencode --port 4096`
+
+4. **Delegate.** Any prompt that makes the orchestrator delegate pops a live pane per subagent. Try:
+
+   > Delegate to the oracle subagent: review packages/herdr-subagent-panes/index.ts and assess whether the event handling is sound.
+
+   Or fan out several at once by prefixing a real task with omo's `ulw` keyword:
+
+   > ulw Review this repository and identify gaps before the next release.
+
+<details>
+<summary>Manual install (without the Herdr plugin system)</summary>
 
 ```bash
 git clone https://github.com/GavinTomlins/herdr-oh-my-agent
@@ -65,41 +89,11 @@ bun install --cwd packages/herdr-subagent-panes
 bun scripts/register-opencode-plugin.mjs
 ```
 
-Or add the absolute path of `packages/herdr-subagent-panes` to the `plugin` array of your `opencode.json` yourself.
+Or add the absolute path of `packages/herdr-subagent-panes` to the `plugin` array of your `opencode.json` yourself, then restart opencode.
 
-## Usage
+</details>
 
-Inside a Herdr pane, launch OpenCode with a fixed port:
-
-```bash
-opencode --port 4096
-```
-
-That's it for the default setup (splits beside the orchestrator, panes kept for review). To choose tabs instead:
-
-```bash
-HERDR_SUBAGENT_PLACEMENT=tab opencode --port 4096
-```
-
-Then work normally. Any prompt that causes the orchestrator to delegate will pop a live pane/tab per subagent.
-
-### Prompts that demonstrate it
-
-A single delegation (a real, reviewable task — coordinators refuse busywork):
-
-> Delegate to the oracle subagent: review packages/herdr-subagent-panes/index.ts and assess whether the event handling is sound.
-
-Two subagents in parallel — two panes appear near-simultaneously:
-
-> Use the explore subagent to map the structure of this repo, and separately delegate to the oracle subagent to assess README.md. Run both.
-
-The full fan-out — prefix a real task with omo's `ulw`/`ultrawork` keyword, which pushes the orchestrator toward multiple specialist delegations:
-
-> ulw Review this repository and identify gaps before the next release.
-
-Trivial questions ("what is today?") are answered directly by the orchestrator without delegating — no subagent, no pane. That's correct behavior, not a plugin failure.
-
-### Configuration
+## Configuration
 
 Set env vars where you launch `opencode`:
 
@@ -111,16 +105,18 @@ Set env vars where you launch `opencode`:
 | `HERDR_SUBAGENT_LIFECYCLE` | `keep` | `keep` leaves panes open for review; `close_on_done` closes them when the subagent finishes |
 | `HERDR_SUBAGENT_MAX_PANES` | `8` | Cap on mirror panes, guarding against delegation storms |
 
-Notes on behavior:
+## Limitations
 
+- **A fixed port is required.** `opencode --port 4096` (any port) — attach URLs can't be built from a random port.
 - **Panes are per-session, not per-agent.** Three oracle delegations = three panes, each with its own complete transcript. Busy orchestrations may prefer `close_on_done` or a higher cap.
-- Outside Herdr (no `HERDR_PANE_ID` in the environment) the plugin no-ops completely.
-- All Herdr calls are best-effort with timeouts — a missing `herdr` binary or a failed call can never affect the delegation itself.
-- Scroll inside the attach pane to read the full transcript (the attach client replays session history). Herdr's own `pane read` sees only the visible viewport of full-screen apps.
+- **Scrollback lives inside the attach pane.** Scroll there for the full replayed transcript; Herdr's own `pane read` sees only the visible viewport of full-screen apps.
+- **Trivial prompts don't delegate.** "What is today?" is answered inline by the orchestrator — no subagent, no pane. Correct behavior, not a failure.
+- **Keep omo's tmux mirroring off** (`tmux.enabled: false`, the default). This plugin is its Herdr equivalent; running both fights over the same sessions.
+- Outside Herdr (no `HERDR_PANE_ID`) the plugin no-ops completely.
 
 ## Troubleshooting
 
-The plugin writes a decision log to `~/.local/share/herdr-subagent-panes/plugin.log`:
+The plugin logs every decision to `~/.local/share/herdr-subagent-panes/plugin.log`:
 
 ```bash
 tail -f ~/.local/share/herdr-subagent-panes/plugin.log
@@ -133,7 +129,7 @@ tail -f ~/.local/share/herdr-subagent-panes/plugin.log
 | `active: …` but no pane on delegation | Check the log for `herdr exit …` lines — they include herdr's stderr. Verify `herdr` is on PATH in that pane |
 | opencode hangs at launch with no output | The port is already taken by an earlier instance — `lsof -nP -iTCP:4096 -sTCP:LISTEN`, then quit or `kill` it |
 | `session.created … parentID=none` only | Your prompt didn't cause a delegation — see the example prompts above |
-| Pane appears then instantly closes | The attach raced session creation; the plugin waits for session readiness, but if it recurs, raise `SESSION_READY_ATTEMPTS` in the plugin and please open an issue |
+| Pane appears then instantly closes | The attach raced session creation; the plugin waits for readiness, but if it recurs please open an issue |
 
 ## The ecosystem
 
@@ -143,7 +139,7 @@ tail -f ~/.local/share/herdr-subagent-panes/plugin.log
 
 ## Roadmap
 
-- **Sidebar tree view** — a Herdr-side companion that renders orchestrator → subagent nesting in the Agents sidebar via metadata tokens and `agent.view.set` projections.
+- **Sidebar tree view** — a Herdr-side companion rendering orchestrator → subagent nesting in the Agents sidebar via metadata tokens and `agent.view.set` projections.
 - **Stream mode** — an alternative read-only plaintext transcript pane (line-oriented, so Herdr-native scrollback and `pane read` work on it).
 - **Per-agent tab reuse** — optionally re-attach one long-lived tab per agent name instead of one tab per session.
 
@@ -159,4 +155,4 @@ PLAN.md                              Design notes and roadmap detail
 
 ## License
 
-[Apache-2.0](LICENSE) © Gavin Tomlins
+[MIT](LICENSE) © Gavin Tomlins
