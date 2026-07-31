@@ -1,6 +1,6 @@
 id = "gavintomlins.herdr-oh-my-agent"
 name = "Oh My Agent Subagent Panes"
-version = "0.1.0"
+version = "0.2.0"
 min_herdr_version = "0.7.5"
 description = "Mirror every oh-my-openagent subagent delegation into its own Herdr pane or tab, live, with full session scrollback"
 platforms = ["macos", "linux"]
