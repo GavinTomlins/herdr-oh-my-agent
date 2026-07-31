@@ -1,0 +1,25 @@
+id = "gavintomlins.herdr-oh-my-agent"
+name = "Oh My Agent Subagent Panes"
+version = "0.1.0"
+min_herdr_version = "0.7.5"
+description = "Mirror every oh-my-openagent subagent delegation into its own Herdr pane or tab, live, with full session scrollback"
+platforms = ["macos", "linux"]
+
+# Install dependencies for the bundled OpenCode plugin.
+[[build]]
+command = ["bun", "install", "--cwd", "packages/herdr-subagent-panes"]
+
+# Register the OpenCode plugin into the user's opencode.json (idempotent,
+# takes a timestamped backup first). Run once after install:
+#   herdr plugin action invoke gavintomlins.herdr-oh-my-agent.register
+[[actions]]
+id = "register"
+title = "Register OpenCode plugin in opencode.json"
+description = "Adds the bundled OpenCode plugin to the opencode.json plugin array (backup taken; idempotent)"
+command = ["bun", "scripts/register-opencode-plugin.mjs"]
+
+[[actions]]
+id = "unregister"
+title = "Unregister OpenCode plugin from opencode.json"
+description = "Removes the bundled OpenCode plugin from the opencode.json plugin array (backup taken)"
+command = ["bun", "scripts/register-opencode-plugin.mjs", "--remove"]

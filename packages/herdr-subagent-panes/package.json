@@ -1,0 +1,13 @@
+{
+  "name": "herdr-subagent-panes",
+  "module": "index.ts",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "index.ts"
+  ],
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.15.13",
+    "@types/bun": "latest"
+  }
+}
