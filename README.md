@@ -8,7 +8,13 @@
 [![OpenCode](https://img.shields.io/badge/opencode-%E2%89%A51.18-3178c6)](https://opencode.ai)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux-lightgrey)](#requirements)
 
-![Demo: subagent panes appearing live in Herdr as the orchestrator delegates](assets/demo.gif)
+**Split placement** (default) — subagent panes appear live beside the orchestrator as it delegates:
+
+![Demo: split placement — subagent panes appearing live beside the orchestrator](assets/demo.gif)
+
+**Tab placement** (`HERDR_SUBAGENT_PLACEMENT=tab`) — each subagent gets its own labeled tab; the tab bar becomes your delegation timeline:
+
+![Demo: tab placement — each subagent in its own labeled tab](assets/demo-tabs.gif)
 
 [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) (a.k.a. *oh-my-agent* / *omo*) turns [OpenCode](https://opencode.ai) into an orchestrated team: a coordinator agent (sisyphus, atlas, …) delegates work to specialist subagents (oracle, momus, explore, librarian, sisyphus-junior, …). Normally those delegations are invisible — you watch a single pane that just says "working", or you walk the session tree by hand (`Ctrl+X` + arrows) after the fact.
 
@@ -108,9 +114,7 @@ Set env vars where you launch `opencode`:
 | `HERDR_SUBAGENT_LIFECYCLE` | `keep` | `keep` leaves panes open for review; `close_on_done` closes them when the subagent finishes |
 | `HERDR_SUBAGENT_MAX_PANES` | `8` | Cap on mirror panes, guarding against delegation storms |
 
-`HERDR_SUBAGENT_PLACEMENT=tab` gives every subagent its own labeled tab instead of a split — the tab bar becomes your delegation timeline:
-
-![Demo: tab placement — each subagent in its own labeled tab](assets/demo-tabs.gif)
+Both placements are shown in the demos at the top of this page.
 
 ## Limitations
 
